@@ -414,7 +414,7 @@ let currentDpId = null;
 // ── GITHUB API ────────────────────────────────────────────────────────────────
 function apiHeaders() {
   const cfg = getCfg();
-  return { 'Authorization': `token ${cfg.token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
+  return { 'Authorization': `Bearer ${cfg.token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json', 'X-GitHub-Api-Version': '2022-11-28' };
 }
 function apiUrl(cfg) {
   return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/clients.json`;
@@ -426,9 +426,13 @@ async function loadFromGitHub() {
   if (!cfg) { setSyncState('error', 'Sin configurar'); return; }
   try {
     const res = await fetch(apiUrl(cfg), { headers: apiHeaders() });
+    if (res.status === 401) throw new Error('Token inválido. Regenera el token con scope repo.');
+    if (res.status === 403) throw new Error('Acceso denegado. Revisa permisos del token.');
     if (res.status === 404) { clients = []; fileSha = null; setSyncState('ok', 'Conectado'); return; }
-    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-    const data = await res.json();
+    if (!res.ok) throw new Error('GitHub API error ' + res.status);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(pe) { throw new Error('Respuesta inesperada. Revisa usuario y repositorio.'); }
     fileSha = data.sha;
     clients = JSON.parse(atob(data.content.replace(/\n/g, '')));
     setSyncState('ok', 'Conectado');
