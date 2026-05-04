@@ -1,0 +1,25 @@
+name: 📧 Avisos Diarios de Revisión de Precios
+
+on:
+  schedule:
+    # Cada día laborable a las 7:00 hora de España (UTC+2 en verano = 5:00 UTC)
+    - cron: '0 5 * * 1-5'
+  workflow_dispatch:
+    # Permite lanzarlo manualmente desde GitHub para hacer pruebas
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enviar avisos de revisión
+        run: node scripts/send-reminders.js
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
