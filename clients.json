@@ -11,7 +11,23 @@
     "currentDiscount": 2,
     "plannedIncrease": 1.3,
     "alertDaysBefore": 1,
-    "notes": "ÚLTIMA APLICACIÓN DE PORCENTAJE APLICADA MAL",
+    "notes": "ÃLTIMA APLICACIÃN DE PORCENTAJE APLICADA MAL",
     "updatedAt": "2026-05-04T17:00:27.714Z"
+  },
+  {
+    "id": "7a57af87-b77e-40bf-b27c-a2946331b070",
+    "name": "HM",
+    "company": "",
+    "contactName": "",
+    "contactEmail": "",
+    "contactPhone": "",
+    "lastNegotiationDate": "2024-04-03",
+    "nextReviewDate": "2026-06-02",
+    "currentDiscount": 1,
+    "plannedIncrease": 3,
+    "alertDaysBefore": 1,
+    "notes": "LA DE HM ES UNA GILIPOLLAS QUE ADEMÁS VISTE COMO EL CULO, MAL FOLLADA PERO LE METIMOS UN BUEN PALO, ESO QUE SE HA LLEVADO",
+    "updatedAt": "2026-05-04T17:08:47.720Z",
+    "createdAt": "2026-05-04T17:08:47.720Z"
   }
 ]
