@@ -321,14 +321,6 @@ textarea{resize:vertical;min-height:70px}
         </div>
       </div>
       <div class="fsec">
-        <div class="fsec-title">Contacto</div>
-        <div class="fgrid">
-          <div class="fg"><label>Nombre del Contacto</label><input type="text" id="f-cname" placeholder="Nombre y apellidos"></div>
-          <div class="fg"><label>Email del Contacto</label><input type="email" id="f-cemail" placeholder="contacto@empresa.com"></div>
-          <div class="fg"><label>Teléfono</label><input type="tel" id="f-cphone" placeholder="+34 600 000 000"></div>
-        </div>
-      </div>
-      <div class="fsec">
         <div class="fsec-title">Fechas de Negociación</div>
         <div class="fgrid">
           <div class="fg"><label>Última Negociación <span class="req">*</span></label><input type="date" id="f-last"></div>
@@ -346,6 +338,14 @@ textarea{resize:vertical;min-height:70px}
       <div class="fsec">
         <div class="fsec-title">Notas</div>
         <div class="fg"><textarea id="f-notes" placeholder="Observaciones, condiciones especiales, historial..."></textarea></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-title">Contacto</div>
+        <div class="fgrid">
+          <div class="fg"><label>Nombre del Contacto</label><input type="text" id="f-cname" placeholder="Nombre y apellidos"></div>
+          <div class="fg"><label>Email del Contacto</label><input type="email" id="f-cemail" placeholder="contacto@empresa.com"></div>
+          <div class="fg"><label>Teléfono</label><input type="tel" id="f-cphone" placeholder="+34 600 000 000"></div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -734,8 +734,8 @@ async function exportExcel() {
   ws.getRow(2).height = 22;
 
   // ── Headers ──
-  const headers = ['Cliente','Empresa','Contacto','Email Contacto','Teléfono','Última Negociación','Próxima Revisión','Días para Revisión','Última Subida (%)','Subida Planificada (%)','Días de Aviso','Estado','Notas'];
-  const colWidths =     [28,        26,       24,       30,              16,       20,                   20,                   16,                    18,                  18,                    14,           14,      42];
+  const headers = ['Cliente','Empresa','Última Negociación','Próxima Revisión','Días para Revisión','Última Subida (%)','Subida Planificada (%)','Días de Aviso','Estado','Notas','Contacto','Email Contacto','Teléfono'];
+  const colWidths =     [28,        26,       20,                   20,                   16,                    18,                  18,                    14,           14,      42,      24,       30,              16];
   const headerRow = ws.addRow(headers);
   headerRow.height = 28;
   headers.forEach((_, i) => {
@@ -764,9 +764,6 @@ async function exportExcel() {
     const row = ws.addRow([
       c.name || '',
       c.company || '',
-      c.contactName || '',
-      c.contactEmail || '',
-      c.contactPhone || '',
       c.lastNegotiationDate ? new Date(c.lastNegotiationDate).toLocaleDateString('es-ES') : '',
       c.nextReviewDate ? new Date(c.nextReviewDate).toLocaleDateString('es-ES') : '',
       days !== null ? days : '',
@@ -774,7 +771,10 @@ async function exportExcel() {
       c.plannedIncrease || 0,
       c.alertDaysBefore || 30,
       status,
-      c.notes || ''
+      c.notes || '',
+      c.contactName || '',
+      c.contactEmail || '',
+      c.contactPhone || ''
     ]);
     row.height = 20;
 
@@ -796,7 +796,7 @@ async function exportExcel() {
     });
 
     // Status cell color
-    const statusCell = row.getCell(12);
+    const statusCell = row.getCell(9);
     if (status === 'VENCIDO') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} }; }
     else if (status === 'URGENTE') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} }; }
     else if (status === 'Próximo') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} }; }
@@ -804,15 +804,15 @@ async function exportExcel() {
 
     // Days cell color
     if (days !== null) {
-      const daysCell = row.getCell(8);
+      const daysCell = row.getCell(5);
       if (days < 0) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} };
       else if (days <= 7) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} };
       else if (days <= 30) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} };
     }
 
     // % cells
-    row.getCell(9).font = { name:'Calibri', size:10, bold:true, color:{argb:'FF2563EB'} };
-    row.getCell(10).font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} };
+    row.getCell(6).font = { name:'Calibri', size:10, bold:true, color:{argb:'FF2563EB'} };
+    row.getCell(7).font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} };
     row.getCell(1).font = { name:'Calibri', size:10, bold:true };
   });
 
