@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0d1117">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
 :root {
   --bg:#0d1117; --surface:#161b22; --surface2:#1c2230; --surface3:#21262d;
@@ -338,7 +338,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="fsec">
         <div class="fsec-title">Condiciones Económicas</div>
         <div class="fgrid3">
-          <div class="fg"><label>Descuento Actual (%)</label><input type="number" id="f-disc" placeholder="0.00" step="0.01" min="0" max="100"><span class="fhint">% negociado actualmente</span></div>
+          <div class="fg"><label>Última Subida Aplicada (%)</label><input type="number" id="f-disc" placeholder="0.00" step="0.01" min="0" max="100"><span class="fhint">% de subida ya aplicada</span></div>
           <div class="fg"><label>Subida Planificada (%)</label><input type="number" id="f-inc" placeholder="0.00" step="0.01" min="0"><span class="fhint">% de subida al revisar</span></div>
           <div class="fg"><label>Avisar con (días)</label><input type="number" id="f-alert" placeholder="30" min="1" value="30"><span class="fhint">Días de antelación</span></div>
         </div>
@@ -381,7 +381,7 @@ textarea{resize:vertical;min-height:70px}
       </div>
       <div class="dp-sec">
         <div class="dp-sec-title">Condiciones Económicas</div>
-        <div class="dp-row"><span class="dlabel">Descuento actual</span><span class="dvalue" id="dp-disc" style="color:#60a5fa;font-family:'JetBrains Mono',monospace">—</span></div>
+        <div class="dp-row"><span class="dlabel">Última subida aplicada</span><span class="dvalue" id="dp-disc" style="color:#60a5fa;font-family:'JetBrains Mono',monospace">—</span></div>
         <div class="dp-row"><span class="dlabel">Subida planificada</span><span class="dvalue" id="dp-inc" style="color:#fbbf24;font-family:'JetBrains Mono',monospace">—</span></div>
       </div>
       <div class="dp-sec" id="dp-notes-sec" style="display:none">
@@ -595,7 +595,7 @@ function renderTable() {
       </td>
     </tr>`;
   }).join('');
-  tbl.innerHTML = `<table><thead><tr><th>Cliente / Empresa</th><th>Contacto</th><th>Última Negoc.</th><th>Próx. Revisión</th><th>Estado</th><th>Descuento Act.</th><th>Subida Plan.</th><th>Acciones</th></tr></thead><tbody>${rows}</tbody></table>`;
+  tbl.innerHTML = `<table><thead><tr><th>Cliente / Empresa</th><th>Contacto</th><th>Última Negoc.</th><th>Próx. Revisión</th><th>Estado</th><th>Última Subida</th><th>Subida Plan.</th><th>Acciones</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function e(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -708,26 +708,124 @@ async function deleteClient(id) {
 }
 
 // ── EXCEL ─────────────────────────────────────────────────────────────────────
-function exportExcel() {
+async function exportExcel() {
   const today = new Date();
-  const rows = clients.map(c => ({
-    'Cliente': c.name, 'Empresa': c.company||'',
-    'Contacto': c.contactName||'', 'Email Contacto': c.contactEmail||'',
-    'Teléfono': c.contactPhone||'',
-    'Última Negociación': c.lastNegotiationDate ? new Date(c.lastNegotiationDate).toLocaleDateString('es-ES') : '',
-    'Próxima Revisión': c.nextReviewDate ? new Date(c.nextReviewDate).toLocaleDateString('es-ES') : '',
-    'Días para Revisión': c.nextReviewDate ? Math.ceil((new Date(c.nextReviewDate)-today)/86400000) : '',
-    'Descuento Actual (%)': c.currentDiscount||0,
-    'Subida Planificada (%)': c.plannedIncrease||0,
-    'Días de Aviso': c.alertDaysBefore||30,
-    'Notas': c.notes||''
-  }));
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:25},{wch:25},{wch:22},{wch:28},{wch:16},{wch:20},{wch:20},{wch:18},{wch:20},{wch:20},{wch:14},{wch:40}];
-  XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
-  XLSX.writeFile(wb, `clientes_revisiones_${new Date().toISOString().slice(0,10)}.xlsx`);
-  toast('Excel descargado correctamente', 'success');
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Client Review Manager · Arthrex';
+  wb.created = new Date();
+  const ws = wb.addWorksheet('Clientes', { views: [{ state: 'frozen', ySplit: 3 }] });
+
+  // ── Title row ──
+  ws.mergeCells('A1:M1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = 'REVISIONES DE PRECIOS DE CLIENTES — ARTHREX';
+  titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F1F3D' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 36;
+
+  // ── Subtitle row ──
+  ws.mergeCells('A2:M2');
+  const subCell = ws.getCell('A2');
+  subCell.value = `Generado el ${today.toLocaleDateString('es-ES', {day:'2-digit',month:'long',year:'numeric'})} · Total: ${clients.length} clientes`;
+  subCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF94A3B8' } };
+  subCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF161B22' } };
+  subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(2).height = 22;
+
+  // ── Headers ──
+  const headers = ['Cliente','Empresa','Contacto','Email Contacto','Teléfono','Última Negociación','Próxima Revisión','Días para Revisión','Última Subida (%)','Subida Planificada (%)','Días de Aviso','Estado','Notas'];
+  const colWidths =     [28,        26,       24,       30,              16,       20,                   20,                   16,                    18,                  18,                    14,           14,      42];
+  const headerRow = ws.addRow(headers);
+  headerRow.height = 28;
+  headers.forEach((_, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF2563EB' } },
+      bottom: { style: 'medium', color: { argb: 'FF2563EB' } },
+      left: { style: 'thin', color: { argb: 'FF2563EB' } },
+      right: { style: 'thin', color: { argb: 'FF2563EB' } }
+    };
+    ws.getColumn(i + 1).width = colWidths[i];
+  });
+
+  // ── AutoFilter ──
+  ws.autoFilter = { from: { row: 3, column: 1 }, to: { row: 3, column: headers.length } };
+
+  // ── Data rows ──
+  clients.forEach((c, idx) => {
+    const days = c.nextReviewDate ? Math.ceil((new Date(c.nextReviewDate) - today) / 86400000) : null;
+    const status = !c.nextReviewDate ? 'Sin fecha' : days < 0 ? 'VENCIDO' : days <= 7 ? 'URGENTE' : days <= 30 ? 'Próximo' : 'Al día';
+    const isEven = idx % 2 === 0;
+
+    const row = ws.addRow([
+      c.name || '',
+      c.company || '',
+      c.contactName || '',
+      c.contactEmail || '',
+      c.contactPhone || '',
+      c.lastNegotiationDate ? new Date(c.lastNegotiationDate).toLocaleDateString('es-ES') : '',
+      c.nextReviewDate ? new Date(c.nextReviewDate).toLocaleDateString('es-ES') : '',
+      days !== null ? days : '',
+      c.currentDiscount || 0,
+      c.plannedIncrease || 0,
+      c.alertDaysBefore || 30,
+      status,
+      c.notes || ''
+    ]);
+    row.height = 20;
+
+    // Row background
+    let rowBg = isEven ? 'FFF8FAFC' : 'FFFFFFFF';
+    if (status === 'VENCIDO' || status === 'URGENTE') rowBg = 'FFFFF1F0';
+    else if (status === 'Próximo') rowBg = 'FFFFFBEB';
+
+    row.eachCell({ includeEmpty: true }, (cell, colNum) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowBg } };
+      cell.font = { name: 'Calibri', size: 10 };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+      cell.alignment = { vertical: 'middle', wrapText: colNum === 13 };
+    });
+
+    // Status cell color
+    const statusCell = row.getCell(12);
+    if (status === 'VENCIDO') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} }; }
+    else if (status === 'URGENTE') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} }; }
+    else if (status === 'Próximo') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} }; }
+    else if (status === 'Al día') { statusCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FF16A34A'} }; }
+
+    // Days cell color
+    if (days !== null) {
+      const daysCell = row.getCell(8);
+      if (days < 0) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} };
+      else if (days <= 7) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFDC2626'} };
+      else if (days <= 30) daysCell.font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} };
+    }
+
+    // % cells
+    row.getCell(9).font = { name:'Calibri', size:10, bold:true, color:{argb:'FF2563EB'} };
+    row.getCell(10).font = { name:'Calibri', size:10, bold:true, color:{argb:'FFD97706'} };
+    row.getCell(1).font = { name:'Calibri', size:10, bold:true };
+  });
+
+  // ── Export ──
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `revisiones_clientes_arthrex_${today.toISOString().slice(0,10)}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Excel profesional descargado correctamente', 'success');
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────────
