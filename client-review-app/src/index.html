@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Review Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2230;
+      --surface3: #21262d;
+      --border: #30363d;
+      --border2: #3d444d;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-dim: rgba(37,99,235,0.15);
+      --success: #16a34a;
+      --success-dim: rgba(22,163,74,0.15);
+      --warning: #d97706;
+      --warning-dim: rgba(217,119,6,0.15);
+      --danger: #dc2626;
+      --danger-dim: rgba(220,38,38,0.15);
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #6e7681;
+      --radius: 8px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .topbar-logo .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .topbar-logo span.sub { color: var(--text2); font-weight: 400; font-size: 13px; }
+    .topbar-spacer { flex: 1; }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+    .notification-badge {
+      display: none;
+      background: var(--danger);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      animation: pulse 2s infinite;
+    }
+    .notification-badge.show { display: inline-flex; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    /* ── LAYOUT ── */
+    .app-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .nav-section-label {
+      padding: 0 16px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text3);
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--surface3); color: var(--text); }
+    .nav-item.active { background: var(--primary-dim); color: #60a5fa; border-left-color: var(--primary); }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+    .nav-count {
+      margin-left: auto;
+      background: var(--surface3);
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .nav-count.urgent { background: var(--danger-dim); color: #f87171; }
+    .sidebar-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border); }
+    .sidebar-footer .version { font-size: 11px; color: var(--text3); }
+
+    /* ── MAIN ── */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .page-header-text h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .page-header-text p { color: var(--text2); font-size: 13px; margin-top: 2px; }
+    .page-header-actions { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border2); }
+    .stat-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+    .stat-card .value { font-size: 28px; font-weight: 700; margin: 6px 0 2px; letter-spacing: -0.03em; }
+    .stat-card .sub { font-size: 12px; color: var(--text2); }
+    .stat-card.danger .value { color: #f87171; }
+    .stat-card.warning .value { color: #fbbf24; }
+    .stat-card.success .value { color: #4ade80; }
+    .stat-card.primary .value { color: #60a5fa; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+    .btn-secondary { background: transparent; color: var(--text); border-color: var(--border2); }
+    .btn-secondary:hover { background: var(--surface3); border-color: var(--text3); }
+    .btn-danger { background: transparent; color: #f87171; border-color: var(--danger); }
+    .btn-danger:hover { background: var(--danger-dim); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; gap: 4px; }
+    .btn-icon { padding: 7px; }
+
+    /* ── SEARCH BAR ── */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .search-wrap { position: relative; flex: 1; max-width: 360px; }
+    .search-wrap .search-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text3); font-size: 14px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 8px 12px 8px 34px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--primary); }
+
+    .filter-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 7px 10px;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-header-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .table-header-row h3 { font-size: 14px; font-weight: 600; }
+    .table-header-row span { color: var(--text2); font-size: 13px; margin-left: 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text3);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+    }
+    thead th:hover { color: var(--text2); }
+    thead th.sorted { color: var(--primary); }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface3); }
+    tbody td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
+    .td-client { font-weight: 600; color: var(--text); }
+    .td-company { color: var(--text2); font-size: 12px; }
+    .td-contact { font-size: 12px; color: var(--text2); }
+    .td-date { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .td-pct { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+    .td-actions { text-align: right; white-space: nowrap; }
+
+    /* ── STATUS BADGES ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-danger { background: var(--danger-dim); color: #f87171; }
+    .badge-warning { background: var(--warning-dim); color: #fbbf24; }
+    .badge-success { background: var(--success-dim); color: #4ade80; }
+    .badge-primary { background: var(--primary-dim); color: #60a5fa; }
+    .badge-neutral { background: var(--surface3); color: var(--text2); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text2);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      width: 640px;
+      max-width: 95vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      animation: modalIn 0.18s ease;
+    }
+    @keyframes modalIn { from{ opacity:0; transform:scale(0.96) translateY(-8px) } to{ opacity:1; transform:none } }
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; flex: 1; }
+    .modal-close { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; padding: 4px; border-radius: 4px; line-height: 1; }
+    .modal-close:hover { color: var(--text); background: var(--surface3); }
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* ── FORM ── */
+    .form-section { margin-bottom: 20px; }
+    .form-section-title {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text3); margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.span2 { grid-column: span 2; }
+    label { font-size: 12px; font-weight: 500; color: var(--text2); }
+    label .required { color: #f87171; margin-left: 2px; }
+    input[type="text"], input[type="email"], input[type="tel"],
+    input[type="date"], input[type="number"], input[type="password"],
+    textarea, select.form-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+    input:focus, textarea:focus, select.form-select:focus { border-color: var(--primary); }
+    input.error, textarea.error { border-color: var(--danger); }
+    textarea { resize: vertical; min-height: 70px; }
+    .form-hint { font-size: 11px; color: var(--text3); }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 10px;
+      animation: toastIn 0.2s ease;
+      min-width: 260px; max-width: 360px;
+    }
+    @keyframes toastIn { from{ opacity:0; transform:translateX(20px) } to{ opacity:1; transform:none } }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--danger); }
+    .toast.info { border-left: 3px solid var(--primary); }
+    .toast.warning { border-left: 3px solid var(--warning); }
+    .toast-icon { font-size: 16px; }
+    .toast-text { flex: 1; }
+    .toast-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0; margin-left: 4px; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 150;
+      justify-content: flex-end;
+    }
+    .detail-overlay.open { display: flex; }
+    .detail-panel {
+      width: 420px; max-width: 95vw;
+      background: var(--surface);
+      border-left: 1px solid var(--border2);
+      height: 100%; overflow-y: auto;
+      animation: slideIn 0.2s ease;
+      display: flex; flex-direction: column;
+    }
+    @keyframes slideIn { from{ transform:translateX(100%) } to{ transform:none } }
+    .detail-header { padding: 20px; border-bottom: 1px solid var(--border); }
+    .detail-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .detail-company { font-size: 13px; color: var(--text2); }
+    .detail-body { padding: 20px; flex: 1; }
+    .detail-section { margin-bottom: 20px; }
+    .detail-section-title {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text3); margin-bottom: 10px;
+    }
+    .detail-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .dlabel { color: var(--text2); }
+    .detail-row .dvalue { font-weight: 500; text-align: right; }
+    .detail-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+
+    /* ── EMAIL CONFIG ── */
+    .config-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .config-row label { width: 110px; flex-shrink: 0; font-size: 12px; font-weight: 500; color: var(--text2); }
+    .config-row input, .config-row select.form-select { flex: 1; }
+
+    /* ── SCROLL ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+    /* ── LOADING ── */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px; color: var(--text2); gap: 10px;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to{ transform:rotate(360deg) } }
+
+    /* ── UPCOMING BANNER ── */
+    .upcoming-banner {
+      display: none;
+      background: var(--danger-dim);
+      border: 1px solid rgba(220,38,38,0.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      align-items: center;
+      gap: 10px;
+    }
+    .upcoming-banner.show { display: flex; }
+    .upcoming-banner strong { color: #f87171; }
+
+    /* ── CHECKBOX ── */
+    .checkbox-group { display: flex; align-items: center; gap: 8px; }
+    .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
+    .checkbox-group label { color: var(--text); font-size: 13px; cursor: pointer; font-weight: 400; }
+
+    /* Responsive for small screens */
+    @media (max-width: 1200px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">📋</div>
+    <div>Client Review Manager <span class="sub">· Arthrex</span></div>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-actions">
+    <span id="urgent-badge" class="notification-badge">0 urgentes</span>
+    <button class="btn btn-secondary btn-sm" onclick="openEmailConfig()">⚙️ Configurar Email</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddClient()">+ Nuevo Cliente</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div style="padding: 0 0 12px;">
+      <div class="nav-section-label">Clientes</div>
+      <div class="nav-item active" id="nav-all" onclick="setFilter('all')">
+        <span class="nav-icon">👥</span> Todos
+        <span class="nav-count" id="cnt-all">0</span>
+      </div>
+      <div class="nav-item" id="nav-urgent" onclick="setFilter('urgent')">
+        <span class="nav-icon">🔴</span> Urgentes
+        <span class="nav-count urgent" id="cnt-urgent">0</span>
+      </div>
+      <div class="nav-item" id="nav-upcoming" onclick="setFilter('upcoming')">
+        <span class="nav-icon">⚠️</span> Próximos 30d
+        <span class="nav-count" id="cnt-upcoming">0</span>
+      </div>
+      <div class="nav-item" id="nav-ok" onclick="setFilter('ok')">
+        <span class="nav-icon">✅</span> Al día
+        <span class="nav-count" id="cnt-ok">0</span>
+      </div>
+    </div>
+    <div style="padding: 12px 0 0; border-top: 1px solid var(--border);">
+      <div class="nav-section-label">Herramientas</div>
+      <div class="nav-item" onclick="exportExcel()">
+        <span class="nav-icon">📊</span> Exportar Excel
+      </div>
+      <div class="nav-item" onclick="openEmailConfig()">
+        <span class="nav-icon">✉️</span> Config. Email
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0.0 · 2024</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2 id="page-title">Todos los Clientes</h2>
+        <p>Gestión de revisiones y negociaciones de precios</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-secondary btn-sm" onclick="exportExcel()">📊 Exportar Excel</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddClient()">+ Nuevo Cliente</button>
+      </div>
+    </div>
+
+    <!-- UPCOMING BANNER -->
+    <div class="upcoming-banner" id="upcoming-banner">
+      <span style="font-size:18px">🔔</span>
+      <div><strong id="banner-text">Hay revisiones próximas</strong> que requieren tu atención.</div>
+      <button class="btn btn-sm btn-secondary" onclick="setFilter('urgent')" style="margin-left:auto">Ver urgentes</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="label">Total Clientes</div>
+        <div class="value" id="stat-total">0</div>
+        <div class="sub">registrados</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="label">Revisiones Urgentes</div>
+        <div class="value" id="stat-urgent">0</div>
+        <div class="sub">≤ 7 días</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="label">Próximos 30 días</div>
+        <div class="value" id="stat-upcoming">0</div>
+        <div class="sub">por revisar</div>
+      </div>
+      <div class="stat-card success">
+        <div class="label">Al día</div>
+        <div class="value" id="stat-ok">0</div>
+        <div class="sub">sin revisión pendiente</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="search-input" placeholder="Buscar por nombre, empresa, contacto..." oninput="renderTable()">
+      </div>
+      <select class="filter-select" id="sort-select" onchange="renderTable()">
+        <option value="days-asc">Próxima revisión (más urgente)</option>
+        <option value="days-desc">Próxima revisión (más lejana)</option>
+        <option value="name-asc">Nombre A-Z</option>
+        <option value="name-desc">Nombre Z-A</option>
+        <option value="company-asc">Empresa A-Z</option>
+      </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-header-row">
+        <h3>Listado de Clientes <span id="table-count"></span></h3>
+      </div>
+      <div id="table-container">
+        <div class="loading"><div class="spinner"></div> Cargando...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADD/EDIT CLIENT ═══ -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Nuevo Cliente</h3>
+      <button class="modal-close" onclick="closeModal('client-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id">
+
+      <div class="form-section">
+        <div class="form-section-title">Datos del Cliente</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del Cliente <span class="required">*</span></label>
+            <input type="text" id="f-name" placeholder="Ej: Hospital Universitario...">
+          </div>
+          <div class="form-group">
+            <label>Empresa / Organización</label>
+            <input type="text" id="f-company" placeholder="Ej: Grupo HM Hospitales">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Contacto</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del Contacto</label>
+            <input type="text" id="f-contact-name" placeholder="Nombre y apellidos">
+          </div>
+          <div class="form-group">
+            <label>Email del Contacto</label>
+            <input type="email" id="f-contact-email" placeholder="contacto@empresa.com">
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" id="f-contact-phone" placeholder="+34 600 000 000">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Fechas de Negociación</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Última Negociación <span class="required">*</span></label>
+            <input type="date" id="f-last-date">
+          </div>
+          <div class="form-group">
+            <label>Próxima Revisión <span class="required">*</span></label>
+            <input type="date" id="f-next-date">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Condiciones Económicas</div>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label>Descuento Actual (%)</label>
+            <input type="number" id="f-current-discount" placeholder="0.00" step="0.01" min="0" max="100">
+            <span class="form-hint">Descuento negociado actual</span>
+          </div>
+          <div class="form-group">
+            <label>Subida Planificada (%)</label>
+            <input type="number" id="f-planned-increase" placeholder="0.00" step="0.01" min="0">
+            <span class="form-hint">% de subida al revisar</span>
+          </div>
+          <div class="form-group">
+            <label>Avisar con (días)</label>
+            <input type="number" id="f-alert-days" placeholder="30" step="1" min="1" value="30">
+            <span class="form-hint">Días de antelación para aviso</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Notas</div>
+        <div class="form-group">
+          <textarea id="f-notes" placeholder="Observaciones, condiciones especiales, historial..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveClient()">💾 Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: EMAIL CONFIG ═══ -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <h3>⚙️ Configuración de Email</h3>
+      <button class="modal-close" onclick="closeModal('email-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text2); font-size:13px; margin-bottom:18px;">
+        Los avisos se enviarán automáticamente a <strong style="color:var(--text)">nadia.mazzoli@arthrex.es</strong> desde la cuenta configurada.
+      </p>
+
+      <div class="form-section">
+        <div class="form-section-title">Servidor SMTP</div>
+        <div class="config-row">
+          <label>Servidor SMTP</label>
+          <input type="text" id="e-host" placeholder="smtp.gmail.com / smtp.office365.com">
+        </div>
+        <div class="config-row">
+          <label>Puerto</label>
+          <input type="number" id="e-port" placeholder="587" style="width:100px; flex:none">
+          <div class="checkbox-group" style="flex:1; margin-left:12px">
+            <input type="checkbox" id="e-secure">
+            <label for="e-secure">Usar SSL (puerto 465)</label>
+          </div>
+        </div>
+        <div class="config-row">
+          <label>Usuario / Email</label>
+          <input type="email" id="e-user" placeholder="tucuenta@empresa.com">
+        </div>
+        <div class="config-row">
+          <label>Contraseña</label>
+          <input type="password" id="e-pass" placeholder="Contraseña o token de app">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Automatización</div>
+        <div class="checkbox-group" style="margin-bottom:10px">
+          <input type="checkbox" id="e-auto-send">
+          <label for="e-auto-send">Enviar emails automáticamente al iniciar la aplicación</label>
+        </div>
+        <p style="color:var(--text3); font-size:12px;">
+          Se enviarán avisos para todos los clientes dentro del período de aviso configurado.
+        </p>
+      </div>
+
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:12px 14px; font-size:12px; color:var(--text2);">
+        💡 <strong style="color:var(--text)">Gmail:</strong> Activa la verificación en dos pasos y crea una "Contraseña de aplicación" en tu cuenta Google.<br>
+        💡 <strong style="color:var(--text)">Outlook/Office365:</strong> Usa smtp.office365.com, puerto 587, sin SSL.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="testEmailConfig()" id="test-btn">🔌 Probar Conexión</button>
+      <button class="btn btn-secondary" onclick="closeModal('email-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEmailConfig()">💾 Guardar Config.</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DETAIL PANEL ═══ -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px">
+        <div>
+          <h2 id="dp-name">—</h2>
+          <div class="detail-company" id="dp-company">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('detail-overlay')" style="flex-shrink:0">✕</button>
+      </div>
+      <div style="margin-top:10px" id="dp-badge"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Información de Contacto</div>
+        <div class="detail-row"><span class="dlabel">Contacto</span><span class="dvalue" id="dp-contact">—</span></div>
+        <div class="detail-row"><span class="dlabel">Email</span><span class="dvalue" id="dp-email" style="font-size:12px">—</span></div>
+        <div class="detail-row"><span class="dlabel">Teléfono</span><span class="dvalue" id="dp-phone">—</span></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Fechas</div>
+        <div class="detail-row"><span class="dlabel">Última negociación</span><span class="dvalue" id="dp-last-date">—</span></div>
+        <div class="detail-row"><span class="dlabel">Próxima revisión</span><span class="dvalue" id="dp-next-date">—</span></div>
+        <div class="detail-row"><span class="dlabel">Días restantes</span><span class="dvalue" id="dp-days">—</span></div>
+        <div class="detail-row"><span class="dlabel">Aviso con antelación</span><span class="dvalue" id="dp-alert-days">—</span></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Condiciones Económicas</div>
+        <div class="detail-row"><span class="dlabel">Descuento actual</span><span class="dvalue" id="dp-discount" style="color:#60a5fa; font-family:'JetBrains Mono',monospace">—</span></div>
+        <div class="detail-row"><span class="dlabel">Subida planificada</span><span class="dvalue" id="dp-increase" style="color:#fbbf24; font-family:'JetBrains Mono',monospace">—</span></div>
+      </div>
+      <div class="detail-section" id="dp-notes-section" style="display:none">
+        <div class="detail-section-title">Notas</div>
+        <p id="dp-notes" style="font-size:13px; color:var(--text2); line-height:1.5"></p>
+      </div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn btn-primary btn-sm" onclick="editCurrentDetail()">✏️ Editar</button>
+      <button class="btn btn-secondary btn-sm" id="dp-email-btn" onclick="sendEmailFromDetail()">✉️ Enviar Aviso</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteCurrentDetail()">🗑️ Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+  let allClients = [];
+  let currentFilter = 'all';
+  let currentDetailId = null;
+
+  // ── INIT ──
+  async function init() {
+    allClients = await window.api.getClients();
+    renderStats();
+    renderTable();
+    checkBanner();
+    loadEmailConfig();
+
+    window.api.onNotification(data => {
+      if (data.type === 'upcoming-reviews') {
+        showBanner(data.count, data.clients);
+      }
+    });
+  }
+
+  // ── STATS ──
+  function getClientStatus(c) {
+    if (!c.nextReviewDate) return 'neutral';
+    const days = Math.ceil((new Date(c.nextReviewDate) - new Date()) / 86400000);
+    if (days < 0) return 'overdue';
+    if (days <= 7) return 'urgent';
+    if (days <= 30) return 'upcoming';
+    return 'ok';
+  }
+
+  function renderStats() {
+    const total = allClients.length;
+    const urgent = allClients.filter(c => ['urgent','overdue'].includes(getClientStatus(c))).length;
+    const upcoming = allClients.filter(c => getClientStatus(c) === 'upcoming').length;
+    const ok = allClients.filter(c => getClientStatus(c) === 'ok').length;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-urgent').textContent = urgent;
+    document.getElementById('stat-upcoming').textContent = upcoming;
+    document.getElementById('stat-ok').textContent = ok;
+
+    document.getElementById('cnt-all').textContent = total;
+    document.getElementById('cnt-urgent').textContent = urgent;
+    document.getElementById('cnt-upcoming').textContent = upcoming + urgent;
+    document.getElementById('cnt-ok').textContent = ok;
+
+    if (urgent > 0) {
+      document.getElementById('urgent-badge').textContent = `${urgent} urgente${urgent > 1 ? 's' : ''}`;
+      document.getElementById('urgent-badge').classList.add('show');
+    } else {
+      document.getElementById('urgent-badge').classList.remove('show');
+    }
+  }
+
+  function checkBanner() {
+    const urgent = allClients.filter(c => ['urgent','overdue'].includes(getClientStatus(c)));
+    const upcoming = allClients.filter(c => getClientStatus(c) === 'upcoming');
+    const total = urgent.length + upcoming.length;
+    if (total > 0) {
+      document.getElementById('upcoming-banner').classList.add('show');
+      document.getElementById('banner-text').textContent =
+        `${total} revisión${total > 1 ? 'es' : ''} próxima${total > 1 ? 's' : ''} (${urgent.length} urgente${urgent.length !== 1 ? 's' : ''})`;
+    } else {
+      document.getElementById('upcoming-banner').classList.remove('show');
+    }
+  }
+
+  function showBanner(count, clients) {
+    checkBanner();
+  }
+
+  // ── FILTER / SORT ──
+  function setFilter(f) {
+    currentFilter = f;
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(`nav-${f}`)?.classList.add('active');
+    const titles = { all: 'Todos los Clientes', urgent: 'Revisiones Urgentes', upcoming: 'Próximos 30 días', ok: 'Al día' };
+    document.getElementById('page-title').textContent = titles[f] || 'Clientes';
+    renderTable();
+  }
+
+  function getFilteredSorted() {
+    let list = [...allClients];
+
+    // filter by nav
+    if (currentFilter === 'urgent') list = list.filter(c => ['urgent','overdue'].includes(getClientStatus(c)));
+    else if (currentFilter === 'upcoming') list = list.filter(c => ['urgent','overdue','upcoming'].includes(getClientStatus(c)));
+    else if (currentFilter === 'ok') list = list.filter(c => getClientStatus(c) === 'ok');
+
+    // search
+    const q = document.getElementById('search-input')?.value.toLowerCase().trim();
+    if (q) list = list.filter(c =>
+      c.name?.toLowerCase().includes(q) ||
+      c.company?.toLowerCase().includes(q) ||
+      c.contactName?.toLowerCase().includes(q) ||
+      c.contactEmail?.toLowerCase().includes(q)
+    );
+
+    // sort
+    const sort = document.getElementById('sort-select')?.value || 'days-asc';
+    list.sort((a, b) => {
+      const da = a.nextReviewDate ? Math.ceil((new Date(a.nextReviewDate) - new Date()) / 86400000) : 9999;
+      const db = b.nextReviewDate ? Math.ceil((new Date(b.nextReviewDate) - new Date()) / 86400000) : 9999;
+      if (sort === 'days-asc') return da - db;
+      if (sort === 'days-desc') return db - da;
+      if (sort === 'name-asc') return (a.name || '').localeCompare(b.name || '');
+      if (sort === 'name-desc') return (b.name || '').localeCompare(a.name || '');
+      if (sort === 'company-asc') return (a.company || '').localeCompare(b.company || '');
+      return 0;
+    });
+
+    return list;
+  }
+
+  // ── TABLE ──
+  function renderTable() {
+    const list = getFilteredSorted();
+    document.getElementById('table-count').textContent = `(${list.length})`;
+
+    const container = document.getElementById('table-container');
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <h3>No hay clientes</h3>
+          <p>Añade tu primer cliente usando el botón "Nuevo Cliente"</p>
+        </div>`;
+      return;
+    }
+
+    const rows = list.map(c => {
+      const days = c.nextReviewDate ? Math.ceil((new Date(c.nextReviewDate) - new Date()) / 86400000) : null;
+      const status = getClientStatus(c);
+      const badgeHtml = statusBadge(status, days);
+      const nextDateStr = c.nextReviewDate ? new Date(c.nextReviewDate).toLocaleDateString('es-ES') : '—';
+      const lastDateStr = c.lastNegotiationDate ? new Date(c.lastNegotiationDate).toLocaleDateString('es-ES') : '—';
+
+      return `<tr onclick="openDetail('${c.id}')">
+        <td>
+          <div class="td-client">${esc(c.name)}</div>
+          <div class="td-company">${esc(c.company || '')}</div>
+        </td>
+        <td class="td-contact">
+          <div>${esc(c.contactName || '—')}</div>
+          <div style="color:var(--text3)">${esc(c.contactEmail || '')}</div>
+        </td>
+        <td class="td-date">${lastDateStr}</td>
+        <td class="td-date" style="color:${status === 'urgent' || status === 'overdue' ? '#f87171' : status === 'upcoming' ? '#fbbf24' : 'inherit'}">${nextDateStr}</td>
+        <td>${badgeHtml}</td>
+        <td class="td-pct" style="color:#60a5fa">${c.currentDiscount != null ? c.currentDiscount + '%' : '—'}</td>
+        <td class="td-pct" style="color:#fbbf24">${c.plannedIncrease != null ? '+' + c.plannedIncrease + '%' : '—'}</td>
+        <td class="td-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-sm btn-secondary" onclick="openEdit('${c.id}')" title="Editar">✏️</button>
+          <button class="btn btn-sm btn-secondary" onclick="sendEmail('${c.id}')" title="Enviar email">✉️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteClient('${c.id}')" title="Eliminar">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente / Empresa</th>
+            <th>Contacto</th>
+            <th>Última Negoc.</th>
+            <th>Próx. Revisión</th>
+            <th>Estado</th>
+            <th>Descuento Act.</th>
+            <th>Subida Plan.</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function statusBadge(status, days) {
+    if (status === 'overdue') return `<span class="badge badge-danger">⚠️ Vencido (${Math.abs(days)}d)</span>`;
+    if (status === 'urgent') return `<span class="badge badge-danger">🔴 ${days}d restantes</span>`;
+    if (status === 'upcoming') return `<span class="badge badge-warning">⏰ ${days}d</span>`;
+    if (status === 'ok') return `<span class="badge badge-success">✅ ${days}d</span>`;
+    return `<span class="badge badge-neutral">—</span>`;
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── DETAIL PANEL ──
+  function openDetail(id) {
+    const c = allClients.find(x => x.id === id);
+    if (!c) return;
+    currentDetailId = id;
+    const days = c.nextReviewDate ? Math.ceil((new Date(c.nextReviewDate) - new Date()) / 86400000) : null;
+    const status = getClientStatus(c);
+
+    document.getElementById('dp-name').textContent = c.name;
+    document.getElementById('dp-company').textContent = c.company || '—';
+    document.getElementById('dp-badge').innerHTML = statusBadge(status, days);
+    document.getElementById('dp-contact').textContent = c.contactName || '—';
+    document.getElementById('dp-email').textContent = c.contactEmail || '—';
+    document.getElementById('dp-phone').textContent = c.contactPhone || '—';
+    document.getElementById('dp-last-date').textContent = c.lastNegotiationDate ? new Date(c.lastNegotiationDate).toLocaleDateString('es-ES', {day:'2-digit',month:'long',year:'numeric'}) : '—';
+    document.getElementById('dp-next-date').textContent = c.nextReviewDate ? new Date(c.nextReviewDate).toLocaleDateString('es-ES', {day:'2-digit',month:'long',year:'numeric'}) : '—';
+    document.getElementById('dp-days').textContent = days != null ? (days < 0 ? `Vencido hace ${Math.abs(days)} días` : `${days} días`) : '—';
+    document.getElementById('dp-alert-days').textContent = (c.alertDaysBefore || 30) + ' días';
+    document.getElementById('dp-discount').textContent = c.currentDiscount != null ? c.currentDiscount + '%' : '—';
+    document.getElementById('dp-increase').textContent = c.plannedIncrease != null ? '+' + c.plannedIncrease + '%' : '—';
+
+    if (c.notes) {
+      document.getElementById('dp-notes-section').style.display = '';
+      document.getElementById('dp-notes').textContent = c.notes;
+    } else {
+      document.getElementById('dp-notes-section').style.display = 'none';
+    }
+
+    document.getElementById('detail-overlay').classList.add('open');
+  }
+
+  function closeDetail(e) {
+    if (e.target === document.getElementById('detail-overlay')) closeModal('detail-overlay');
+  }
+
+  function editCurrentDetail() {
+    closeModal('detail-overlay');
+    if (currentDetailId) openEdit(currentDetailId);
+  }
+
+  function sendEmailFromDetail() {
+    if (currentDetailId) sendEmail(currentDetailId);
+  }
+
+  function deleteCurrentDetail() {
+    if (currentDetailId) {
+      closeModal('detail-overlay');
+      deleteClient(currentDetailId);
+    }
+  }
+
+  // ── ADD / EDIT MODAL ──
+  function openAddClient() {
+    clearForm();
+    document.getElementById('modal-title').textContent = 'Nuevo Cliente';
+    document.getElementById('f-alert-days').value = 30;
+    document.getElementById('client-modal').classList.add('open');
+  }
+
+  function openEdit(id) {
+    const c = allClients.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('modal-title').textContent = 'Editar Cliente';
+    document.getElementById('f-id').value = c.id;
+    document.getElementById('f-name').value = c.name || '';
+    document.getElementById('f-company').value = c.company || '';
+    document.getElementById('f-contact-name').value = c.contactName || '';
+    document.getElementById('f-contact-email').value = c.contactEmail || '';
+    document.getElementById('f-contact-phone').value = c.contactPhone || '';
+    document.getElementById('f-last-date').value = c.lastNegotiationDate || '';
+    document.getElementById('f-next-date').value = c.nextReviewDate || '';
+    document.getElementById('f-current-discount').value = c.currentDiscount ?? '';
+    document.getElementById('f-planned-increase').value = c.plannedIncrease ?? '';
+    document.getElementById('f-alert-days').value = c.alertDaysBefore || 30;
+    document.getElementById('f-notes').value = c.notes || '';
+    document.getElementById('client-modal').classList.add('open');
+  }
+
+  function clearForm() {
+    ['f-id','f-name','f-company','f-contact-name','f-contact-email','f-contact-phone',
+     'f-last-date','f-next-date','f-current-discount','f-planned-increase','f-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('f-alert-days').value = 30;
+  }
+
+  async function saveClient() {
+    const name = document.getElementById('f-name').value.trim();
+    const lastDate = document.getElementById('f-last-date').value;
+    const nextDate = document.getElementById('f-next-date').value;
+    if (!name) { toast('El nombre del cliente es obligatorio', 'error'); return; }
+    if (!lastDate) { toast('La fecha de última negociación es obligatoria', 'error'); return; }
+    if (!nextDate) { toast('La fecha de próxima revisión es obligatoria', 'error'); return; }
+
+    const client = {
+      id: document.getElementById('f-id').value || undefined,
+      name,
+      company: document.getElementById('f-company').value.trim(),
+      contactName: document.getElementById('f-contact-name').value.trim(),
+      contactEmail: document.getElementById('f-contact-email').value.trim(),
+      contactPhone: document.getElementById('f-contact-phone').value.trim(),
+      lastNegotiationDate: lastDate,
+      nextReviewDate: nextDate,
+      currentDiscount: parseFloat(document.getElementById('f-current-discount').value) || 0,
+      plannedIncrease: parseFloat(document.getElementById('f-planned-increase').value) || 0,
+      alertDaysBefore: parseInt(document.getElementById('f-alert-days').value) || 30,
+      notes: document.getElementById('f-notes').value.trim()
+    };
+
+    await window.api.saveClient(client);
+    allClients = await window.api.getClients();
+    renderStats(); renderTable(); checkBanner();
+    closeModal('client-modal');
+    toast(`Cliente "${name}" guardado correctamente`, 'success');
+  }
+
+  async function deleteClient(id) {
+    const c = allClients.find(x => x.id === id);
+    if (!c) return;
+    if (!confirm(`¿Eliminar el cliente "${c.name}"? Esta acción no se puede deshacer.`)) return;
+    await window.api.deleteClient(id);
+    allClients = await window.api.getClients();
+    renderStats(); renderTable(); checkBanner();
+    toast(`Cliente "${c.name}" eliminado`, 'info');
+  }
+
+  // ── EMAIL ──
+  async function sendEmail(id) {
+    const c = allClients.find(x => x.id === id);
+    toast(`Enviando email para "${c?.name}"...`, 'info');
+    const res = await window.api.sendReminderEmail(id);
+    if (res.success) toast('✅ Email enviado correctamente a nadia.mazzoli@arthrex.es', 'success');
+    else toast(`Error al enviar: ${res.error}`, 'error');
+  }
+
+  async function loadEmailConfig() {
+    const cfg = await window.api.getEmailConfig();
+    if (!cfg) return;
+    document.getElementById('e-host').value = cfg.host || '';
+    document.getElementById('e-port').value = cfg.port || 587;
+    document.getElementById('e-secure').checked = cfg.secure || false;
+    document.getElementById('e-user').value = cfg.user || '';
+    document.getElementById('e-pass').value = cfg.pass || '';
+    document.getElementById('e-auto-send').checked = cfg.autoSend || false;
+  }
+
+  function openEmailConfig() {
+    loadEmailConfig();
+    document.getElementById('email-modal').classList.add('open');
+  }
+
+  async function saveEmailConfig() {
+    const config = {
+      host: document.getElementById('e-host').value.trim(),
+      port: parseInt(document.getElementById('e-port').value) || 587,
+      secure: document.getElementById('e-secure').checked,
+      user: document.getElementById('e-user').value.trim(),
+      pass: document.getElementById('e-pass').value,
+      autoSend: document.getElementById('e-auto-send').checked
+    };
+    if (!config.host || !config.user || !config.pass) {
+      toast('Completa todos los campos SMTP', 'error'); return;
+    }
+    await window.api.saveEmailConfig(config);
+    closeModal('email-modal');
+    toast('Configuración de email guardada', 'success');
+  }
+
+  async function testEmailConfig() {
+    const btn = document.getElementById('test-btn');
+    btn.disabled = true; btn.textContent = '⏳ Probando...';
+    const config = {
+      host: document.getElementById('e-host').value.trim(),
+      port: parseInt(document.getElementById('e-port').value) || 587,
+      secure: document.getElementById('e-secure').checked,
+      user: document.getElementById('e-user').value.trim(),
+      pass: document.getElementById('e-pass').value
+    };
+    const res = await window.api.testEmail(config);
+    btn.disabled = false; btn.textContent = '🔌 Probar Conexión';
+    if (res.success) toast('✅ Conexión exitosa. Email de prueba enviado.', 'success');
+    else toast(`Error: ${res.error}`, 'error');
+  }
+
+  async function exportExcel() {
+    const res = await window.api.exportToExcel();
+    if (res.canceled) return;
+    if (res.success) toast(`✅ Excel exportado correctamente`, 'success');
+    else toast(`Error al exportar`, 'error');
+  }
+
+  // ── MODAL UTILS ──
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  // ── TOAST ──
+  function toast(msg, type = 'info', duration = 4000) {
+    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-text">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => el.remove(), duration);
+  }
+
+  // ── KEYBOARD ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open, .detail-overlay.open').forEach(el => el.classList.remove('open'));
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>
