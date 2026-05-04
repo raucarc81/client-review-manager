@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "3be0f951-4edb-4105-88eb-5817e1ac9857",
+    "name": "ADESLA",
+    "company": "ADESLA",
+    "contactName": "JAIME",
+    "contactEmail": "jaime.adesla@adesala.es",
+    "contactPhone": "652659874",
+    "lastNegotiationDate": "2025-06-01",
+    "nextReviewDate": "2026-05-06",
+    "currentDiscount": 2,
+    "plannedIncrease": 1.3,
+    "alertDaysBefore": 1,
+    "notes": "la última negociación estuvo complicada y costó",
+    "updatedAt": "2026-05-04T16:38:37.659Z",
+    "createdAt": "2026-05-04T16:38:37.660Z"
+  }
+]
