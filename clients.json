@@ -13,5 +13,21 @@
     "alertDaysBefore": 30,
     "notes": "REVISAR PRÓXIMA SUBIDA FY 2027",
     "updatedAt": "2026-05-05T12:42:07.569Z"
+  },
+  {
+    "id": "de4c73f1-845e-4aa8-9d92-48b71c20dc8d",
+    "name": "ORGOA",
+    "company": "ORGOA",
+    "contactName": "Ramiro Cupeiro",
+    "contactEmail": "rcupeiro@orgoa.es",
+    "contactPhone": "",
+    "lastNegotiationDate": "2026-01-16",
+    "nextReviewDate": "2027-01-16",
+    "currentDiscount": 2,
+    "plannedIncrease": 2,
+    "alertDaysBefore": 30,
+    "notes": "REVISAR PRÓXIMA SUBIDA AÑO NATURAL 2027",
+    "updatedAt": "2026-05-05T12:43:33.430Z",
+    "createdAt": "2026-05-05T12:43:33.430Z"
   }
 ]
