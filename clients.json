@@ -45,5 +45,21 @@
     "notes": "REVISAR PRÓXIMA SUBIDA AÑO NATURAL 2027",
     "updatedAt": "2026-05-05T12:45:10.053Z",
     "createdAt": "2026-05-05T12:45:10.053Z"
+  },
+  {
+    "id": "ded2ecf1-f2e6-407b-a918-f724ab72e8ae",
+    "name": "GRUPO VITHAS",
+    "company": "GRUPO VITHAS",
+    "contactName": "Judith Manzano Giráldez",
+    "contactEmail": "manzanoj@vithas.es",
+    "contactPhone": "",
+    "lastNegotiationDate": "2026-05-08",
+    "nextReviewDate": "2027-05-08",
+    "currentDiscount": 2,
+    "plannedIncrease": 2,
+    "alertDaysBefore": 30,
+    "notes": "REVISAR PRÓXIMA REVISIÓN DEL GRUPO 2027",
+    "updatedAt": "2026-05-05T12:46:22.164Z",
+    "createdAt": "2026-05-05T12:46:22.164Z"
   }
 ]
