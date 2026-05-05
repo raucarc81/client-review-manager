@@ -61,5 +61,21 @@
     "notes": "REVISAR PRÓXIMA REVISIÓN DEL GRUPO 2027",
     "updatedAt": "2026-05-05T12:46:22.164Z",
     "createdAt": "2026-05-05T12:46:22.164Z"
+  },
+  {
+    "id": "375c3b73-387c-457d-ae4c-df8bc038fa1c",
+    "name": "DIVINA PASTORA",
+    "company": "4000002110",
+    "contactName": "Eva María Biosca",
+    "contactEmail": "gestion.protesis@divinaseguros.com",
+    "contactPhone": "",
+    "lastNegotiationDate": "2026-05-05",
+    "nextReviewDate": "2027-01-04",
+    "currentDiscount": 2.5,
+    "plannedIncrease": 2.5,
+    "alertDaysBefore": 30,
+    "notes": "REVISAR PRÓXIMA SUBIDA AÑO NATURAL 2027",
+    "updatedAt": "2026-05-05T12:48:01.734Z",
+    "createdAt": "2026-05-05T12:48:01.734Z"
   }
 ]
