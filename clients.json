@@ -29,5 +29,21 @@
     "notes": "REVISAR PRÓXIMA SUBIDA AÑO NATURAL 2027",
     "updatedAt": "2026-05-05T12:43:33.430Z",
     "createdAt": "2026-05-05T12:43:33.430Z"
+  },
+  {
+    "id": "e3e616d3-4e25-4a11-b9fd-8b0970d1271e",
+    "name": "AEGON",
+    "company": "4000002112",
+    "contactName": "Marta García San Segundo",
+    "contactEmail": "garcia.marta@aegon.es",
+    "contactPhone": "",
+    "lastNegotiationDate": "2026-04-30",
+    "nextReviewDate": "2027-01-04",
+    "currentDiscount": 2.9,
+    "plannedIncrease": 2.9,
+    "alertDaysBefore": 30,
+    "notes": "REVISAR PRÓXIMA SUBIDA AÑO NATURAL 2027",
+    "updatedAt": "2026-05-05T12:45:10.053Z",
+    "createdAt": "2026-05-05T12:45:10.053Z"
   }
 ]
