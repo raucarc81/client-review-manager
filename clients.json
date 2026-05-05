@@ -13,20 +13,5 @@
     "alertDaysBefore": 30,
     "notes": "REVISAR PRÓXIMA SUBIDA FY 2027",
     "updatedAt": "2026-05-05T12:42:07.569Z"
-  },
-  {
-    "id": "7a57af87-b77e-40bf-b27c-a2946331b070",
-    "name": "HM",
-    "company": "",
-    "contactName": "Ana",
-    "contactEmail": "Anana@hm.es",
-    "contactPhone": "632587485",
-    "lastNegotiationDate": "2024-04-03",
-    "nextReviewDate": "2026-06-02",
-    "currentDiscount": 1,
-    "plannedIncrease": 3,
-    "alertDaysBefore": 1,
-    "notes": "",
-    "updatedAt": "2026-05-04T17:11:48.627Z"
   }
 ]
