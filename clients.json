@@ -3,7 +3,7 @@
     "id": "3be0f951-4edb-4105-88eb-5817e1ac9857",
     "name": "ADESLAS",
     "company": "4000002116",
-    "contactName": "Jaime López Sorrosal",
+    "contactName": "Jaime LÃ³pez Sorrosal",
     "contactEmail": "jlopezs@segurcaixaadeslas.es",
     "contactPhone": "",
     "lastNegotiationDate": "2026-07-01",
@@ -26,7 +26,7 @@
     "currentDiscount": 2,
     "plannedIncrease": 2,
     "alertDaysBefore": 30,
-    "notes": "REVISAR PRÃXIMA SUBIDA AÃO NATURAL 2027",
+    "notes": "REVISAR PRÃÂXIMA SUBIDA AÃÂO NATURAL 2027",
     "updatedAt": "2026-05-05T12:43:33.430Z",
     "createdAt": "2026-05-05T12:43:33.430Z"
   },
@@ -34,7 +34,7 @@
     "id": "e3e616d3-4e25-4a11-b9fd-8b0970d1271e",
     "name": "AEGON",
     "company": "4000002112",
-    "contactName": "Marta GarcÃ­a San Segundo",
+    "contactName": "Marta GarcÃÂ­a San Segundo",
     "contactEmail": "garcia.marta@aegon.es",
     "contactPhone": "",
     "lastNegotiationDate": "2026-04-30",
@@ -42,7 +42,7 @@
     "currentDiscount": 2.9,
     "plannedIncrease": 2.9,
     "alertDaysBefore": 30,
-    "notes": "REVISAR PRÃXIMA SUBIDA AÃO NATURAL 2027",
+    "notes": "REVISAR PRÃÂXIMA SUBIDA AÃÂO NATURAL 2027",
     "updatedAt": "2026-05-05T12:45:10.053Z",
     "createdAt": "2026-05-05T12:45:10.053Z"
   },
@@ -50,7 +50,7 @@
     "id": "ded2ecf1-f2e6-407b-a918-f724ab72e8ae",
     "name": "GRUPO VITHAS",
     "company": "GRUPO VITHAS",
-    "contactName": "Judith Manzano GirÃ¡ldez",
+    "contactName": "Judith Manzano GirÃÂ¡ldez",
     "contactEmail": "manzanoj@vithas.es",
     "contactPhone": "",
     "lastNegotiationDate": "2026-05-08",
@@ -58,7 +58,7 @@
     "currentDiscount": 2,
     "plannedIncrease": 2,
     "alertDaysBefore": 30,
-    "notes": "REVISAR PRÃXIMA REVISIÃN DEL GRUPO 2027",
+    "notes": "REVISAR PRÃÂXIMA REVISIÃÂN DEL GRUPO 2027",
     "updatedAt": "2026-05-05T12:46:22.164Z",
     "createdAt": "2026-05-05T12:46:22.164Z"
   },
@@ -66,7 +66,7 @@
     "id": "375c3b73-387c-457d-ae4c-df8bc038fa1c",
     "name": "DIVINA PASTORA",
     "company": "4000002110",
-    "contactName": "Eva MarÃ­a Biosca",
+    "contactName": "Eva MarÃÂ­a Biosca",
     "contactEmail": "gestion.protesis@divinaseguros.com",
     "contactPhone": "",
     "lastNegotiationDate": "2026-05-05",
@@ -74,7 +74,7 @@
     "currentDiscount": 2.5,
     "plannedIncrease": 2.5,
     "alertDaysBefore": 30,
-    "notes": "REVISAR PRÃXIMA SUBIDA AÃO NATURAL 2027",
+    "notes": "REVISAR PRÃÂXIMA SUBIDA AÃÂO NATURAL 2027",
     "updatedAt": "2026-05-05T12:48:01.734Z",
     "createdAt": "2026-05-05T12:48:01.734Z"
   },
@@ -90,8 +90,7 @@
     "currentDiscount": 0,
     "plannedIncrease": 2.5,
     "alertDaysBefore": 30,
-    "notes": "Contacto: Susana Castrillo",
-    "updatedAt": "2026-05-25T13:53:45.500Z",
-    "createdAt": "2026-05-25T13:53:45.500Z"
+    "notes": "Contactos:  (Jon Mendiguren y Susana Castrillo).",
+    "updatedAt": "2026-05-29T10:38:31.528Z"
   }
 ]
