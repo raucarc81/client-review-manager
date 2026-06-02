@@ -40,9 +40,9 @@
     "nextReviewDate": "2027-01-04",
     "currentDiscount": 2.9,
     "plannedIncrease": 2.9,
-    "alertDaysBefore": 30,
+    "alertDaysBefore": 60,
     "notes": "REVISAR SUBIDA AÑO NATURAL 2027",
-    "updatedAt": "2026-06-02T11:02:45.180Z"
+    "updatedAt": "2026-06-02T11:02:55.443Z"
   },
   {
     "id": "ded2ecf1-f2e6-407b-a918-f724ab72e8ae",
