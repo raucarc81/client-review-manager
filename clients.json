@@ -82,12 +82,12 @@
     "contactName": "Jon Mendiguren",
     "contactEmail": "jmendiguren@imq.es",
     "contactPhone": "",
-    "lastNegotiationDate": "2023-01-01",
-    "nextReviewDate": "2026-07-01",
+    "lastNegotiationDate": "2026-07-01",
+    "nextReviewDate": "2027-07-01",
     "currentDiscount": 0,
     "plannedIncrease": 2.5,
-    "alertDaysBefore": 30,
+    "alertDaysBefore": 45,
     "notes": "Contactos:  (Jon Mendiguren y Susana Castrillo - scastrillo@imq.es).",
-    "updatedAt": "2026-05-29T10:42:11.845Z"
+    "updatedAt": "2026-06-02T10:59:40.457Z"
   }
 ]
