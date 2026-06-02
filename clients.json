@@ -57,9 +57,9 @@
     "nextReviewDate": "2027-01-01",
     "currentDiscount": 2,
     "plannedIncrease": 2,
-    "alertDaysBefore": 30,
+    "alertDaysBefore": 90,
     "notes": "REVISAR PRÃÂÃÂXIMA REVISIÃÂÃÂN DEL GRUPO 2027",
-    "updatedAt": "2026-06-02T10:46:36.897Z"
+    "updatedAt": "2026-06-02T10:47:06.714Z"
   },
   {
     "id": "375c3b73-387c-457d-ae4c-df8bc038fa1c",
